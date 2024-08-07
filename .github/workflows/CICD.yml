@@ -2,7 +2,9 @@ name: CICD
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "main"
+      - "develop"
 
 permissions:
   contents: read
@@ -12,6 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Cache
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       # JDK
       - name: Install JDK 17
@@ -48,12 +61,12 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Set Target IP
+      - name: Set Target Port
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.AGARANG_SERVER_IP }}/env")
+          STATUS=$(curl -L -o /dev/null -w "%{http_code}" "https://agarang.site/env")
           echo $STATUS
           if [ $STATUS = 200 ]; then
-            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.AGARANG_SERVER_IP }}/env")
+            CURRENT_UPSTREAM=$(curl -L -s "https://agarang.site/env")
           else
             CURRENT_UPSTREAM=green
           fi
@@ -78,7 +91,7 @@ jobs:
           script_stop: true
           script: |
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/agarang:latest
-            sudo docker-compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml up -d
+            sudo docker-compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml -p ${{env.TARGET_UPSTREAM}} up -d
       
       - name: Check deploy server URL
         uses: jtalk/url-health-check-action@v4
@@ -97,7 +110,7 @@ jobs:
           script: |
             sudo docker exec -i nginxserver bash -c 'echo "set \$service_url ${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload' 
 
-      - name: Stop current server
+      - name: Stop current server & network connect
         uses: appleboy/ssh-action@master
         with:
           username: ubuntu
@@ -105,5 +118,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
+            sudo docker network connect my-network ${{env.TARGET_UPSTREAM}}
             sudo docker stop ${{env.CURRENT_UPSTREAM}}
             sudo docker rm ${{env.CURRENT_UPSTREAM}}

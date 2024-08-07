@@ -1,0 +1,20 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  # jpa:
+  #   defer-datasource-initialization: true # Sql auto init after jpa ddl-auto operation
+  # sql: # Set src/main/resources/data.sql auto init
+  #   init:
+  #     mode: always
+  #     data-locations: classpath:data.sql
+  data:
+    redis:
+      host: localhost
+      port: 6380
+
+deploy:
+  env: local
+
+app:
+  baseUrl: http://localhost:8080

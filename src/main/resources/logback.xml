@@ -1,0 +1,46 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!--콘솔 공통-->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <!--Local : 콘솔O 디스코드 알림X-->
+    <springProfile name="local">
+        <include resource="console-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="Console"/>
+        </root>
+    </springProfile>
+
+    <!--BLUE & GREEN : 콘솔O 디스코드 알림O-->
+    <springProfile name="blue, green">
+        <property resource="application-secret.yml"/>
+        <springProperty name="DISCORD_WEBHOOK_URL" source="logging.discord.webhook-url"/>
+        <appender name="DISCORD" class="com.github.napstr.logback.DiscordAppender">
+            <webhookUri>${DISCORD_WEBHOOK_URL}</webhookUri>
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>### [Summary]%n%msg%n### [Time]%n%d{yyyy-MM-dd HH:mm:ss}%n### [Level]%n%-5level%n### [Header]%n- host: %mdc{host}%n- uri: %mdc{method}  %mdc{uri}%mdc{query}%n- cookie: %mdc{cookie}%n### [Details]%n```%mdc{details}```</pattern>
+            </layout>
+            <username> 🚨ERROR LOGS 🚨 </username>
+            <avatarUrl>https://agarang-s3-bucket.s3.ap-northeast-2.amazonaws.com/logs/logdog.png</avatarUrl>
+            <tts>false</tts>
+        </appender>
+
+        <appender name="ASYNC_DISCORD" class="ch.qos.logback.classic.AsyncAppender">
+            <appender-ref ref="DISCORD" />
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>ERROR</level>
+            </filter>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="ASYNC_DISCORD"/>
+            <appender-ref ref="Console"/>
+        </root>
+    </springProfile>
+</configuration>

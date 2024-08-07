@@ -1,60 +1,13 @@
 spring:
   application:
     name: agarang
-
----
-spring:
   profiles:
-    active: blue
+    active: local
     group:
-      local: local, common, secret
-      blue: blue, common, secret
-      green: green, common, secret
+      local: local, secret
+      blue: blue, secret, prod
+      green: green, secret, prod
 
-server:
-  env: blue
-
----
-spring:
-  config:
-    activate:
-      on-profile: local
-
-server:
-  port: 8080
-
-serverAddress: localhost
-serverName: local_server
-
----
-spring:
-  config:
-    activate:
-      on-profile: blue
-
-server:
-  port: 8080
-
-serverAddress: 43.200.109.115
-serverName: blue_server
-
----
-spring:
-  config:
-    activate:
-      on-profile: green
-
-server:
-  port: 8081
-
-serverAddress: 43.200.109.115
-serverName: green_server
-
----
-spring:
-  config:
-    activate:
-      on-profile: common
   jpa:
     generate-ddl: true
     hibernate:
@@ -64,3 +17,45 @@ spring:
         show_sql: true
         format_sql: true
     open-in-view: true
+
+  data:
+    redis:
+      repositories:
+        enabled: false
+    jpa:
+      repositories:
+        bootstrap-mode: deferred
+
+aws:
+  s3:
+    upload:
+      tempPath: ./temp/
+
+springdoc:
+  api-docs:
+    path: /api-json
+  swagger-ui:
+    path: /api-docs # 302 /swagger-ui/index.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  paths-to-exclude: /env
+
+---
+spring:
+  config:
+    activate:
+      on-profile: blue
+
+deploy:
+  env: blue
+
+---
+spring:
+  config:
+    activate:
+      on-profile: green
+
+deploy:
+  env: green
+server:
+  port: 8081

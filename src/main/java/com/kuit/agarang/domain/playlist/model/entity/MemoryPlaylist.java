@@ -21,4 +21,9 @@ public class MemoryPlaylist extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "memory_id")
   private Memory memory;
+
+  public MemoryPlaylist(Memory memory, Playlist playlist) {
+    this.playlist = playlist;
+    this.memory = memory;
+  }
 }

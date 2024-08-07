@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class MusicDto {
+    private Long memoryId;
     private String imageUrl;
     private String musicTitle;
     private String musicUrl;
@@ -16,7 +17,8 @@ public class MusicDto {
     private boolean isBookmarked;
 
     @Builder
-    public MusicDto(String imageUrl, String musicTitle, String musicUrl, List<String> hashTags, boolean isBookmarked) {
+    public MusicDto(Long memoryId, String imageUrl, String musicTitle, String musicUrl, List<String> hashTags, boolean isBookmarked) {
+        this.memoryId = memoryId;
         this.imageUrl = imageUrl;
         this.musicTitle = musicTitle;
         this.musicUrl = musicUrl;
@@ -26,6 +28,7 @@ public class MusicDto {
 
     public static MusicDto of(Memory memory, boolean isBookmarked) {
         return MusicDto.builder()
+                .memoryId(memory.getId())
                 .imageUrl(memory.getImageUrl())
                 .musicTitle(memory.getMusicTitle())
                 .musicUrl(memory.getMusicUrl())

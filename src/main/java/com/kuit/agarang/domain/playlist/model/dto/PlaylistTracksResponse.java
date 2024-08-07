@@ -9,4 +9,6 @@ import java.util.List;
 public class PlaylistTracksResponse {
     private PlaylistDto playlist;
     private List<MusicDto> tracks;
+    private int totalTrackCount;
+    private int totalTrackTime;
 }

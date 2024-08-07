@@ -5,6 +5,7 @@ import com.kuit.agarang.domain.memory.model.entity.MusicBookmark;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MusicBookmarkRepository extends JpaRepository<MusicBookmark, Long> {
-    boolean existsByMemoryIdAndMemberId(Long memoryId, Long memberId);
+    MusicBookmark findByMemory(Memory memory);
+    boolean existsByMemory(Memory memory);
     void deleteByMemory(Memory memory);
 }
